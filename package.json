@@ -1,0 +1,20 @@
+{
+  "name": "finantialinstitution",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpbusta10/finantialInstitutionDocker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jpbusta10/finantialInstitutionDocker/issues"
+  },
+  "homepage": "https://github.com/jpbusta10/finantialInstitutionDocker#readme"
+}
