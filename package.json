@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/jpbusta10/finantialInstitutionDocker/issues"
   },
-  "homepage": "https://github.com/jpbusta10/finantialInstitutionDocker#readme"
+  "homepage": "https://github.com/jpbusta10/finantialInstitutionDocker#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
