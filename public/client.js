@@ -1,31 +1,34 @@
 console.log('client.js');
 
-const loginForm = document.querySelector('#login-form');
+
 const loanForm = document.querySelector('#loan-form');
 const results = document.querySelector('#results');
 console.log(loginForm);
 
 // Login form submit event listener
+fetch('/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ username: username, password: password })
+})
+.then(response => {
+  if(response.redirected) {
+    window.location.href = response.url;
+  } else {
+    const error = document.querySelector('#error');
+    error.innerHTML = 'Invalid username or password';
+  }
+});
+
+const loginForm = document.querySelector('#login-form');
+
 loginForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const username = document.querySelector('#username').value;
   const password = document.querySelector('#password').value;
-
-  fetch('/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ username: username, password: password })
-  })
-  .then(response => {
-    if(response.redirected) {
-      window.location.href = response.url;
-    } else {
-      const error = document.querySelector('#error');
-      error.innerHTML = 'Invalid username or password';
-    }
-  });
+  
 });
 
 // Loan form submit event listener
