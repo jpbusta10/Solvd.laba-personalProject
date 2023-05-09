@@ -2,79 +2,92 @@ const express = require('express');
 const app = express();
 const path = require('path');
 
+app.use(express.json()); // Parse JSON request bodies
+
 const users = [
   {id:1, username: 'user1', password: '1234'},
   {id:2, username: 'user2', password: 'password2'},
   {id:3, username: 'user3' , password: 'password3'},
 ];
 
-const tokens = {};
+const accessTokens = {};  // Define accessTokens variable
+const refreshTokens = {}; // Define refreshTokens variable
 
 const generateToken = () => {
-  const uuid = require('uuid');
-  const token = uuid.v4();
-  console.log('token: '+token);
+  const { v4: uuidv4 } = require('uuid');
+  const token = uuidv4();
+  console.log('token: ' + token);
   return token;
 };
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'), { index: 'login.html' }));
-
-
-app.post('/login',(req, res)=>{
-  console.log(req.body);
-  const {username, password} = req.body;
-  console.log('username:', username, 'password:', password); /// debug
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  console.log('username:', username, 'password:', password); // Debug
   const user = users.find(u => u.username === username && u.password === password);
-  if (!user){
-    return res.status(401).json({message: 'invalid username or password'});
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid username or password' });
   }
-  const token = generateToken();
-  tokens[token] = user.id;
-  res.cookie('token', token); // Set token as cookie
-  res.redirect('/index.html'); // Redirect to index.html after successful login
+  const accessToken = generateToken();
+  const refreshToken = generateToken();
+  accessTokens[accessToken] = user.id; // Use accessTokens instead of tokens
+  refreshTokens[refreshToken] = user.id; // Use refreshTokens instead of tokens
+  res.json({ accessToken: accessToken, refreshToken: refreshToken, userId: user.id });
 });
 
-
-const authenticateToken  = (req, res, next) => {
+const authenticateToken = (req, res, next) => {
   console.log('auth token');
-  const token = req.headers['authorization'];
-  if (!token){
-    return res.status(401).json({message: 'unauthorized'});
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
-  const userid = tokens[token];
-  if (!userid){
-    return res.status(401).json({message: 'invalid token'});
+  const [tokenType, token] = authHeader.split(' ');
+  if (tokenType !== 'Bearer') {
+    return res.status(401).json({ message: 'Invalid token type' });
   }
-  req.userid = userId;
+
+  const userId = accessTokens[token]; // Corrected variable name
+  if (userId) {
+    req.userId = userId;
+    return next();
+  }
+
+  const refreshTokenData = refreshTokens[token];
+  if (!refreshTokenData) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+
+  const newAccessToken = generateToken();
+  accessTokens[newAccessToken] = refreshTokenData;
+  delete accessTokens[token];
+
+  res.set('Authorization', `Bearer ${newAccessToken}`);
+  res.set('Refresh-Token', token);
+  req.userId = refreshTokenData;
   next();
 };
 
-app.post('/loan', authenticateToken , (req, res) => {
-  let salary = req.body.salary;
-  let n = req.body.installments;
 
-  let interestRate = 0.08;
-  let mInterest = interestRate / 12;
+app.post('/loan', authenticateToken, (req, res) => {
+  const { salary, installments } = req.body;
 
-  let installment = 0.2 * salary;
-  let capital = installment * ((1 - (1 / Math.pow(1 + mInterest, n))) / mInterest);
-  let totalInterest = (installment * n) - capital;
+  const interestRate = 0.08;
+  const mInterest = interestRate / 12;
 
-  capital = capital.toFixed(2);
-  installment = installment.toFixed(2);
-  totalInterest = totalInterest.toFixed(2);
+  const installment = 0.2 * salary;
+  const capital = installment * ((1 - (1 / Math.pow(1 + mInterest, installments))) / mInterest);
+  const totalInterest = installment * installments - capital;
+
+  const formattedCapital = capital.toFixed(2);
+  const formattedInstallment = installment.toFixed(2);
+  const formattedTotalInterest = totalInterest.toFixed(2);
 
   res.json({
-    capital: capital,
-    installment: installment,
-    totalInterest: totalInterest
+    capital: formattedCapital,
+    installment: formattedInstallment,
+    totalInterest: formattedTotalInterest
   });
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+app.listen(3000, () => console.log('Server started on port 3000'));
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+
