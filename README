@@ -1,26 +1,35 @@
 BANK LOAN CALCULATION
 This program calculates the capital that can be borrowed from a financial institution using the French amortization system. It takes the user's salary and the number of monthly installments they require as input and outputs the following information:
 
-
-Running the Program
-PREREQUISITES
-Node.js (if running the program locally)
-Docker (if running the program using Docker)
-
+this program calculates the capital recibed from the finatial institution under the french amortization system.
+It gives an installment amount of 20% of the users salary given to the program, then the user also enters the number of monthly installments they
+require.
 
 Open a web browser and navigate to http://localhost:3000 to access the loan calculator.
 OUTPUT:
 
+this program will outmput:
+capital that the intitution can lent.
+amount of installment.
+total interest paid.
+anual interest rate fixed by the institution.
+To access the loan calculator, open a web browser and navigate to http://localhost:3000. Once there, you will be prompted to enter your username and password. There are
+3 users:
+user1 password: 1234
+user2 password: password2
+user3 password: password3
 
-RUNNING WITH DOCKER 
+Once authenticated, you will be presented with a loan form where you can enter your salary and the number of monthly installments you require. The program will then calculate the amount of capital that can be borrowed, the installment amount, the total interest paid, and the annual interest rate fixed by the institution.
+
+RUNNING WITH DOCKER:
 
 firt you need to have already installed docker in your machine.
 
 Then you can pull the docker image from dockerHub use the following comand:
-docker pull jpbusta/finance
+docker pull jpbusta/finance:v2
 
 to run the docker image use the following comand:
-docker run -it --rm jpbusta/finance
+docker run -p 3000:3000 jpbusta/finance:v2
 
 
 
