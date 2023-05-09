@@ -3,6 +3,13 @@ const app = express();
 const path = require('path');
 
 app.use(express.json()); // Parse JSON request bodies
+app.post('/signup', (req, res) => {
+  const { username, password, } = req.body;
+  if(!username || !password) {
+    return res.status(400).json({ message: 'Invalid username or password' });
+  }
+  
+});
 
 const users = [
   {id:1, username: 'user1', password: '1234'},
