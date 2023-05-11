@@ -34,21 +34,21 @@ class Loan{
       const client = await pool.connect();
   
       // Create loan type
-      const createLoanTypeQuery = 'INSERT INTO loantype (system, currensy, capital, interest, duration) VALUES ($1, $2, $3, $4, $5) RETURNING loantypeid';
+      const createLoanTypeQuery = 'INSERT INTO loantype (system, currency, capital, interest, duration) VALUES ($1, $2, $3, $4, $5) RETURNING loantypeid';
       const createLoanTypeValues = [system, currency, capital, interest, duration];
       const loanTypeResult = await client.query(createLoanTypeQuery, createLoanTypeValues);
       const loanTypeId = loanTypeResult.rows[0].loantypeid;
   
+      // Create loan current state
+      const createLoanCurrentStateQuery = 'INSERT INTO loancurrentstate (stateid, ispaid, installmentspaid) VALUES (1, false, 0) RETURNING stateid';
+      const loanCurrentStateResult = await client.query(createLoanCurrentStateQuery);
+      const stateId = loanCurrentStateResult.rows[0].stateid;
+  
       // Create loan
-      const createLoanQuery = 'INSERT INTO loans (userid, stateid, loantypeid) VALUES ($1, 1, $2) RETURNING loanid';
-      const createLoanValues = [userId, loanTypeId];
+      const createLoanQuery = 'INSERT INTO loans (userid, stateid) VALUES ($1, $2) RETURNING loanid';
+      const createLoanValues = [userId, stateId];
       const loanResult = await client.query(createLoanQuery, createLoanValues);
       const loanId = loanResult.rows[0].loanid;
-  
-      // Create loan current state
-      const createLoanCurrentStateQuery = 'INSERT INTO loancurrentstate (stateid, ispaid, installmentspaid) VALUES ($1, false, 0)';
-      const createLoanCurrentStateValues = [loanId];
-      await client.query(createLoanCurrentStateQuery, createLoanCurrentStateValues);
   
       client.release();
   
@@ -61,6 +61,8 @@ class Loan{
       throw error;
     }
   }
+  
+  
   
   
 }
