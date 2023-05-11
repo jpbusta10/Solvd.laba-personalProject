@@ -1,16 +1,26 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const User = require('./User');
+const Loan = require('./Loan');
 
 app.use(express.json()); // Parse JSON request bodies
+app.post('/signup', async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Invalid username or password' });
+  }
 
-const users = [
-  {id:1, username: 'user1', password: '1234'},
-  {id:2, username: 'user2', password: 'password2'},
-  {id:3, username: 'user3' , password: 'password3'},
-];
-
-const accessTokens = {};  // Define accessTokens variable
+  try {
+    const user = new User();
+    await user.createUser(username, password);
+    res.json({ message: 'User created successfully' });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ message: 'Failed to create user' });
+  }
+});
+const accessTokens = {} ;  // Define accessTokens variable
 const refreshTokens = {}; // Define refreshTokens variable
 
 const generateToken = () => {
@@ -19,20 +29,34 @@ const generateToken = () => {
   console.log('token: ' + token);
   return token;
 };
-
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   console.log('username:', username, 'password:', password); // Debug
-  const user = users.find(u => u.username === username && u.password === password);
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid username or password' });
+
+  try {
+    const user = new User();
+    const foundUser = await user.getUserByUsernameAndPassword(username, password);
+    console.log('foundUser:', foundUser); // Debug
+    if (!foundUser) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
+    const accessToken = generateToken();
+    const refreshToken = generateToken();
+    
+    // Store tokens and user IDs in accessTokens and refreshTokens respectively
+    accessTokens[accessToken] = foundUser.userid;
+    refreshTokens[refreshToken] = foundUser.userid;
+    console.log('accessTokens:', accessTokens[accessToken])
+    
+    res.json({ accessToken, refreshToken, userId: foundUser.userid });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ message: 'Failed to login' });
   }
-  const accessToken = generateToken();
-  const refreshToken = generateToken();
-  accessTokens[accessToken] = user.id; // Use accessTokens instead of tokens
-  refreshTokens[refreshToken] = user.id; // Use refreshTokens instead of tokens
-  res.json({ accessToken: accessToken, refreshToken: refreshToken, userId: user.id });
 });
+
+
 
 const authenticateToken = (req, res, next) => {
   console.log('auth token');
@@ -45,9 +69,11 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Invalid token type' });
   }
 
-  const userId = accessTokens[token]; // Corrected variable name
+  const userId = accessTokens[token];
+  console.log('userId: ' + userId); // Debug
   if (userId) {
     req.userId = userId;
+    console.log('userId: ' + userId); // Debug
     return next();
   }
 
@@ -66,27 +92,38 @@ const authenticateToken = (req, res, next) => {
   next();
 };
 
+app.post('/loan', authenticateToken, async (req, res) => {
+  try {
+    const { salary, installments } = req.body;
+    const userId = req.userId;
+    const interestRate = 0.08;
+    const mInterest = interestRate / 12;
 
-app.post('/loan', authenticateToken, (req, res) => {
-  const { salary, installments } = req.body;
+    const installment = 0.2 * salary;
+    const capital = installment * ((1 - (1 / Math.pow(1 + mInterest, installments))) / mInterest);
+    const totalInterest = installment * installments - capital;
 
-  const interestRate = 0.08;
-  const mInterest = interestRate / 12;
+    const formattedCapital = capital.toFixed(2);
+    const formattedInstallment = installment.toFixed(2);
+    const formattedTotalInterest = totalInterest.toFixed(2);
 
-  const installment = 0.2 * salary;
-  const capital = installment * ((1 - (1 / Math.pow(1 + mInterest, installments))) / mInterest);
-  const totalInterest = installment * installments - capital;
+    // Create a new instance of Loan
+    const myloan = new Loan();
 
-  const formattedCapital = capital.toFixed(2);
-  const formattedInstallment = installment.toFixed(2);
-  const formattedTotalInterest = totalInterest.toFixed(2);
+    // Create a new loan in the database
+    await myloan.createLoan(userId, 'french', 'USD', formattedCapital, formattedTotalInterest, installments);
 
-  res.json({
-    capital: formattedCapital,
-    installment: formattedInstallment,
-    totalInterest: formattedTotalInterest
-  });
+    res.json({
+      capital: formattedCapital,
+      installment: formattedInstallment,
+      totalInterest: formattedTotalInterest
+    });
+  } catch (error) {
+    console.error('Error creating loan:', error);
+    res.status(500).json({ message: 'Failed to create loan' });
+  }
 });
+
 
 app.listen(3000, () => console.log('Server started on port 3000'));
 
