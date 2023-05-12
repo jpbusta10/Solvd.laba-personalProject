@@ -8,4 +8,7 @@ RUN npm install
 
 COPY . .
 
+# Add the database migration step
+RUN apt-get update && apt-get install -y postgresql-client
+
 CMD [ "node", "index.js" ]
