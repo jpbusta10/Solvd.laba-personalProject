@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start:dev": "node index.js",
+    "build": "babel src -d dist"
   },
   "repository": {
     "type": "git",
@@ -18,9 +19,13 @@
   },
   "homepage": "https://github.com/jpbusta10/finantialInstitutionDocker#readme",
   "dependencies": {
-    "bcrypt": "^5.1.0",
     "express": "^4.18.2",
     "pg": "^8.10.0",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.15.4",
+    "@babel/preset-env": "^7.15.4"
   }
 }
+
