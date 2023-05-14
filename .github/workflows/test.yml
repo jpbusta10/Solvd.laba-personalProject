@@ -22,7 +22,7 @@ jobs:
 
       - name: Run tests
         run: |
-          # Run your tests here against the running containers
+          npx mocha
 
       - name: Tear down containers
         run: docker-compose down
