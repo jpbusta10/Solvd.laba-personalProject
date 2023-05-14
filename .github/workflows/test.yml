@@ -20,7 +20,7 @@ jobs:
         run: docker volume create --name=postgres-data
 
       - name: Set up Docker Compose
-        run: docker-compose up 
+        run: docker-compose up -d
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
