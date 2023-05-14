@@ -54,31 +54,6 @@ describe('Server', () => {
     loanTypeId = response.body.loanTypeId;
   });
 
-  after(async () => {
-    try {
-      console.log('Cleaning up...');
-      const client = await pool.connect();
-      const deleteLoanCurrentStateQuery = 'DELETE FROM loancurrentstate WHERE stateid = $1';
-      await client.query(deleteLoanCurrentStateQuery, [stateId]);
-  
-      const deleteLoanQuery = 'DELETE FROM loans WHERE loanid = $1';
-      await client.query(deleteLoanQuery, [loanId]);
-  
-      const deleteLoanTypeQuery = 'DELETE FROM loantype WHERE loantypeid = $1';
-      await client.query(deleteLoanTypeQuery, [loanTypeId]);
-  
-      const deleteUserQuery = 'DELETE FROM users WHERE userid = $1';
-      await client.query(deleteUserQuery, [userId]);
-  
-      client.release();
-      console.log('Clean up completed');
-    } catch (error) {
-      console.log('Error during cleanup:', error);
-      throw error;
-      done();
-    }
-  });
-  
-  
+
 });
 
