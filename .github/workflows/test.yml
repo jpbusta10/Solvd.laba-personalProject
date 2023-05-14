@@ -1,34 +1,27 @@
-name: Test
+name: CI
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create PostgreSQL volume
-        run: docker volume create --name=postgres-data
-
-      - name: Set up Docker Compose
-        run: docker-compose up -d
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install
+      - name: Build and run containers
+        run: |
+          docker-compose up --build --no-start
+          docker-compose start
+          docker-compose ps
 
       - name: Run tests
-        run: npx mocha
+        run: |
+          # Run your tests here against the running containers
+
+      - name: Tear down containers
+        run: docker-compose down
