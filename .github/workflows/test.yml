@@ -11,28 +11,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - name: Build and run containers
-        run: |
-          docker volume create --name=postgres-data
-          docker-compose up --build --no-start
-          docker-compose start
-          docker-compose ps
-
-      - name: Wait for containers to start
-        run: sleep 10s
-
-      - name: Expose container ports
-        run: |
-          docker-compose port app 3000
-          docker-compose port db 5432
-
       - name: Run tests
         run: |
-          docker-compose up --abort-on-container-exit --exit-code-from tests
+          docker-compose start app db
+          docker-compose exec tests npx mocha
 
       - name: Show test logs
         run: |
-          docker-compose logs solvdlaba-personalproject_tests_1
+          docker-compose logs tests
 
       - name: Tear down containers
         run: docker-compose down
