@@ -28,7 +28,7 @@ jobs:
 
       - name: Run tests
         run: |
-          docker exec finantialinstitution-tests-1 npx mocha
+          docker-compose restart tests
 
       - name: Tear down containers
         run: docker-compose down
