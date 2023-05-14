@@ -27,17 +27,17 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./database_dump.sql:/docker-entrypoint-initdb.d/database_init.sql
       
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@pgadmin.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-      - PGADMIN_LISTEN_PORT=80
-    ports:
-      - "8080:80"
-    depends_on:
-      - db
+ ## pgadmin:
+   # image: dpage/pgadmin4
+    #restart: always
+    #environment:
+     # - PGADMIN_DEFAULT_EMAIL=admin@pgadmin.com
+     # - PGADMIN_DEFAULT_PASSWORD=admin
+     # - PGADMIN_LISTEN_PORT=80
+    #ports:
+     # - "8080:80"
+   # depends_on:
+    #  - db
 
 volumes:
   postgres-data:
