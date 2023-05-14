@@ -18,6 +18,9 @@ jobs:
           docker-compose start
           docker-compose ps
 
+      - name: Wait for containers to start
+        run: sleep 10s
+
       - name: Expose container ports
         run: |
           docker-compose port app 3000
@@ -25,8 +28,11 @@ jobs:
 
       - name: Run tests
         run: |
-          docker-compose restart tests
-          docker logs -f solvdlaba-personalproject_tests_1
+          docker-compose up --abort-on-container-exit --exit-code-from tests
+
+      - name: Show test logs
+        run: |
+          docker-compose logs solvdlaba-personalproject_tests_1
 
       - name: Tear down containers
         run: docker-compose down
