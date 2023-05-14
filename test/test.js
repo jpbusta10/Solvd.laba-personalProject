@@ -1,10 +1,15 @@
 const request = require('supertest');
 const app = 'http://localhost:3000';
 const assert = require('assert');
-
+const pool = require('../src/dataBase');
 describe('Server', () => {
   let accessToken;
   let refreshToken;
+  let userId;
+  let loanId;
+  let stateId;
+  let loanTypeId;
+  
 
   it('should create a new user on POST /signup', async () => {
     const response = await request(app)
@@ -42,5 +47,38 @@ describe('Server', () => {
     assert.ok(response.body.capital);
     assert.ok(response.body.installment);
     assert.ok(response.body.totalInterest);
+
+    loanId = response.body.loanId;
+    userId = response.body.userId;
+    stateId = response.body.stateId;
+    loanTypeId = response.body.loanTypeId;
   });
+
+  after(async () => {
+    try {
+      console.log('Cleaning up...');
+      const client = await pool.connect();
+      const deleteLoanCurrentStateQuery = 'DELETE FROM loancurrentstate WHERE stateid = $1';
+      await client.query(deleteLoanCurrentStateQuery, [stateId]);
+  
+      const deleteLoanQuery = 'DELETE FROM loans WHERE loanid = $1';
+      await client.query(deleteLoanQuery, [loanId]);
+  
+      const deleteLoanTypeQuery = 'DELETE FROM loantype WHERE loantypeid = $1';
+      await client.query(deleteLoanTypeQuery, [loanTypeId]);
+  
+      const deleteUserQuery = 'DELETE FROM users WHERE userid = $1';
+      await client.query(deleteUserQuery, [userId]);
+  
+      client.release();
+      console.log('Clean up completed');
+    } catch (error) {
+      console.log('Error during cleanup:', error);
+      throw error;
+      done();
+    }
+  });
+  
+  
 });
+

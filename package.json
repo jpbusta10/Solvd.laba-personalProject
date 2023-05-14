@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.15.4",
+    "@babel/core": "^7.21.8",
     "@babel/preset-env": "^7.15.4",
     "supertest": "^6.3.3"
   }
