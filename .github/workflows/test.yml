@@ -26,7 +26,7 @@ jobs:
       - name: Run tests
         run: |
           docker-compose restart tests
-          docker logs -f tests
+          docker logs -f solvdlaba-personalproject_tests_1
 
       - name: Tear down containers
         run: docker-compose down
