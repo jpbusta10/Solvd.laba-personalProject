@@ -10,7 +10,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
+      - name: Build and run containers
+        run: |
+          docker volume create --name=postgres-data
+          docker-compose up --build --no-start app db tests
+
       - name: Run tests
         run: |
           docker-compose start app db
