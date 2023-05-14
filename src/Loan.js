@@ -40,7 +40,7 @@ class Loan{
       const loanTypeId = loanTypeResult.rows[0].loantypeid;
   
       // Create loan current state
-      const createLoanCurrentStateQuery = 'INSERT INTO loancurrentstate (stateid, ispaid, installmentspaid) VALUES (1, false, 0) RETURNING stateid';
+      const createLoanCurrentStateQuery = 'INSERT INTO loancurrentstate (stateid, ispaid, installmentspaid) VALUES (DEFAULT, false, 0) RETURNING stateid';
       const loanCurrentStateResult = await client.query(createLoanCurrentStateQuery);
       const stateId = loanCurrentStateResult.rows[0].stateid;
   
