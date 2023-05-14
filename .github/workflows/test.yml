@@ -12,20 +12,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      db:
-        image: postgres
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: root
-          POSTGRES_DB: finInstitution
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Create PostgreSQL volume
+        run: docker volume create --name=postgres-data
+
+      - name: Set up Docker Compose
+        run: docker-compose up -d
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -35,14 +30,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start containers
-        run: docker-compose up -d
-
-      - name: Wait for database
-        run: docker-compose exec -T db sh -c "until pg_isready; do sleep 1; done"
-
       - name: Run tests
         run: npx mocha
-
-      - name: Stop containers
-        run: docker-compose down
