@@ -13,12 +13,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Docker
+        uses: docker/setup-docker@v1
+
       - name: Build and run containers
         run: |
-              docker volume create --name=postgres-data
-              docker-compose up --build --no-start
-              docker-compose start
-              docker-compose ps
+          docker volume create --name=postgres-data
+          docker-compose up --build --no-start
+          docker-compose start
+          docker-compose ps
+
+      - name: Wait for containers to start
+        run: sleep 10s
+
+      - name: Expose container ports
+        run: |
+          docker-compose port app 3000
+          docker-compose port db 5432
 
       - name: Run tests
         run: |
