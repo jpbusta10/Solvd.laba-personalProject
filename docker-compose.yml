@@ -1,7 +1,9 @@
 version: "3.8"
 
+networks:
+  mynetwork:
+
 services:
-  
   app:
     image: jpbusta/fininstitute:latest
     ports:
@@ -13,6 +15,8 @@ services:
     depends_on:
       - db
     restart: always
+    networks:
+      - mynetwork
     
   db:
     image: postgres
@@ -26,6 +30,8 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./database_dump.sql:/docker-entrypoint-initdb.d/database_init.sql
+    networks:
+      - mynetwork
       
   pgadmin:
     image: dpage/pgadmin4
@@ -38,8 +44,22 @@ services:
       - "8080:80"
     depends_on:
       - db
+    networks:
+      - mynetwork
+
+  tests:
+    image: jpbusta/fininstitute:latest
+    command: npx mocha
+    depends_on:
+      - db
+      - app
+    volumes:
+      - ./test:/app/test
+    environment:
+      - DATABASE_HOST=db
+    networks:
+      - mynetwork
 
 volumes:
   postgres-data:
     external: true
-
