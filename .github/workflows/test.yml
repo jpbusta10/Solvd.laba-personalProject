@@ -15,9 +15,10 @@ jobs:
 
       - name: Build and run containers
         run: |
-          docker-compose up --build --no-start
-          docker-compose start
-          docker-compose ps
+              docker volume create --name=postgres-data
+              docker-compose up --build --no-start
+              docker-compose start
+              docker-compose ps
 
       - name: Run tests
         run: |
