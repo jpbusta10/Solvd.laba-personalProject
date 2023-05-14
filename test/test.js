@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = 'http://localhost:3000';
+const app = 'http://app:3000';
 const assert = require('assert');
 const pool = require('../src/dataBase');
 describe('Server', () => {
@@ -37,7 +37,7 @@ describe('Server', () => {
     const response = await request(app)
       .post('/loan')
       .set('Accept', '*/*')
-      .set('User-Agent', 'Thunder Client (https://www.thunderclient.com)')
+      .set('User-Agent', 'this is the way')
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${accessToken}`)
       .set('Refresh-Token', refreshToken)
@@ -54,6 +54,29 @@ describe('Server', () => {
     loanTypeId = response.body.loanTypeId;
   });
 
-
+  after(async () => {
+    try {
+      console.log('Cleaning up...');
+      const client = await pool.connect();
+      const deleteLoanCurrentStateQuery = 'DELETE FROM loancurrentstate WHERE stateid = $1';
+      await client.query(deleteLoanCurrentStateQuery, [stateId]);
+  
+      const deleteLoanQuery = 'DELETE FROM loans WHERE loanid = $1';
+      await client.query(deleteLoanQuery, [loanId]);
+  
+      const deleteLoanTypeQuery = 'DELETE FROM loantype WHERE loantypeid = $1';
+      await client.query(deleteLoanTypeQuery, [loanTypeId]);
+  
+      const deleteUserQuery = 'DELETE FROM users WHERE userid = $1';
+      await client.query(deleteUserQuery, [userId]);
+  
+      client.release();
+      console.log('Clean up completed');
+    } catch (error) {
+      console.log('Error during cleanup:', error);
+      throw error;
+      done();
+    }
+  });
 });
 
